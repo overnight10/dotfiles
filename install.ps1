@@ -72,7 +72,7 @@ function main {
     Write-Host "[INFO] Fetching scoop.json from repository
 
     try {
-        Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$user/$repository/refs/heads/$branch/assets/scoop.json" -OutFile $outputFile
+        Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$user/$repository/$branch/assets/scoop.json" -OutFile $outputFile
         scoop import $outputFile
         Write-Host "[INFO] Scoop packages installed!"
     }
