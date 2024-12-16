@@ -791,6 +791,7 @@ def theme [mode: string] {
     let starship_config = ($env.USERPROFILE | path join ".config" "starship.toml")
     let helix_config = ($env.USERPROFILE | path join ".config" "helix" "config.toml")
     let terminal_config = ($env.USERPROFILE | path join ".config" "terminal" "settings.json")
+    let btop_config = ($env.USERPROFILE | path join ".config" "btop" "btop.conf")
 
     let config = {
         light: {
@@ -801,7 +802,7 @@ def theme [mode: string] {
                 theme: "Catppuccin Latte",
                 opacity: 50
             },
-            wallpaper: "3272946494"
+            btop: "catppuccin_latte"
         }
         dark: {
             windows: "dark",
@@ -810,18 +811,23 @@ def theme [mode: string] {
                 scheme: "Catppuccin Mocha",
                 theme: "Catppuccin Mocha",
                 opacity: 65
-            }
+            },
+            btop: "catppuccin_mocha"
         }
     }
 
     let config = $config | get $mode
     let switcher = ($env.USERPROFILE | path join ".config" "nushell" $"($config.windows).bat")
+    let btop_theme = $"~/.config/btop/themes/($config.btop)"
 
-    # Set the config
+    echo $btop_theme
+
+    # Individual apps
     open $starship_config | update palette $config.starship | save -f $starship_config
     open $helix_config | update theme $config.starship | save -f $helix_config
+    open $btop_config | from ssv -n | each { |l| if ($l.column0 | str contains "color_theme =") { $l | update column0 $"color_theme = ($btop_theme)" } else { $l } } | get column0 | save -f $btop_config
 
-    # Set the terminal config
+    # Terminal
     open $terminal_config | update profiles.defaults.colorScheme $config.terminal.scheme | save -f $terminal_config
     open $terminal_config | update profiles.defaults.opacity $config.terminal.opacity | save -f $terminal_config
     open $terminal_config | update theme $config.terminal.theme | save -f $terminal_config
