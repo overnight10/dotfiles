@@ -69,7 +69,7 @@ function main {
 
     # Path for scoop.json
     $outputFile = Join-Path -Path $pwd -ChildPath "scoop.json"
-    Write-Host "[INFO] Fetching scoop.json from repository
+    Write-Host "[INFO] Fetching scoop.json from repository"
 
     try {
         Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$user/$repository/$branch/assets/scoop.json" -OutFile $outputFile
