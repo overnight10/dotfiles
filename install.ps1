@@ -14,7 +14,7 @@ $symlinkRecords = @(
 )
 
 # Enhanced linking function
-function Linking {
+function linking {
     param (
         [Parameter(Mandatory = $true)]
         [array]$records
