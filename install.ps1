@@ -21,33 +21,32 @@ function Linking {
     )
 
     foreach ($record in $records) {
-        $sourcePath = Join-Path -Path $HOME -ChildPath $record.Source
-        $targetPath = Join-Path -Path $HOME -ChildPath $record.Target
-
+        $exists = Test-Path -Path $record.Source
+        if (!$exists) {
+            continue
+        }
         # Cleanup: Automatically handle existing items at the source path
-        if (Test-Path -Path $sourcePath) {
-            try {
-                if ((Get-Item -Path $sourcePath).LinkType -eq 'SymbolicLink') {
-                    # Remove existing symbolic link
-                    Remove-Item -Force -Path $sourcePath
-                    Write-Host "[INFO] Existing symlink $sourcePath removed." -ForegroundColor Yellow
-                }
-                else {
-                    # Remove existing file or folder
-                    Remove-Item -Force -Recurse -Path $sourcePath
-                    Write-Host "[INFO] Existing file/folder $sourcePath removed." -ForegroundColor Yellow
-                }
+        try {
+            if ((Get-Item -Path $record.Source).LinkType -eq 'SymbolicLink') {
+                # Remove existing symbolic link
+                Remove-Item -Force -Path $record.Source
+                Write-Host "[INFO] Existing symlink $record.Source removed." -ForegroundColor Yellow
             }
-            catch {
-                Write-Host "[ERROR] Failed to remove $sourcePath. Error: $_" -ForegroundColor Red
-                continue
+            else {
+                # Remove existing file or folder
+                Remove-Item -Force -Recurse -Path $record.Source
+                Write-Host "[INFO] Existing file/folder $record.Source removed." -ForegroundColor Yellow
             }
+        }
+        catch {
+            Write-Host "[ERROR] Failed to remove $record.Source. Error: $_" -ForegroundColor Red
+            continue
         }
 
         # Create the symbolic link
         try {
-            New-Item -ItemType SymbolicLink -Path $sourcePath -Target $targetPath
-            Write-Host "[INFO] Symlink created: $sourcePath -> $targetPath" -ForegroundColor Green
+            New-Item -ItemType SymbolicLink -Path $record.Source -Target $record.Target
+            Write-Host "[INFO] Symlink created: $record.Source -> $record.Target" -ForegroundColor Green
         }
         catch {
             Write-Host "[ERROR] Failed to create symlink: $_" -ForegroundColor Red
