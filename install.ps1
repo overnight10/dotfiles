@@ -1,6 +1,6 @@
 #Requires -RunAsAdministrator
 
-$user = "nova"
+$user = "overnight10"
 $repository = "dotfiles"
 $branch = "windows"
 
@@ -69,10 +69,10 @@ function main {
 
     # Path for scoop.json
     $outputFile = Join-Path -Path $pwd -ChildPath "scoop.json"
-    Write-Host "[INFO] Fetching scoop.json from: https://raw.githubusercontent.com/$user/$repository/$branch/assets/scoop.json"
+    Write-Host "[INFO] Fetching scoop.json from repository
 
     try {
-        Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$user/$repository/$branch/assets/scoop.json" -OutFile $outputFile
+        Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$user/$repository/refs/heads/$branch/assets/scoop.json" -OutFile $outputFile
         scoop import $outputFile
         Write-Host "[INFO] Scoop packages installed!"
     }
