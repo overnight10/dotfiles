@@ -1,0 +1,42 @@
+"$schema" = "https://yazi-rs.github.io/schemas/yazi.json"
+
+[manager]
+linemode = "size_and_mtime"
+
+[[plugin.prepend_fetchers]]
+id = "mime"
+if = "!(mime|dummy)"
+name = "*"
+run = "mime-ext"
+prio = "high"
+
+[opener]
+play = [
+    { run = 'vlc --fullscreen %*', desc = "vlc", orphan = true, for = "windows" },
+]
+edit = [
+    { run = "hx %*", desc = "hx", block = true, for = "windows" },
+    { run = "nano %*", desc = "nano", block = true, for = "windows" },
+]
+view = [
+    { run = "picview %*", desc = "PicView", for = "windows" }
+]
+open = [
+    { run = "xdg-open %*", desc = "Open with default program", for = "linux" },
+    { run = 'start "" %*', desc = "Start", for = "windows" },
+]
+
+[open]
+rules = [
+    { mime = "text/*", use = "edit" },
+    { mime = "video/*", use = "play" },
+    { mime = "image/*", use = "view" },
+
+    { mime = "application/json", use = "edit" },
+    { name = "*.jsonc", use = "edit" },
+    { name = "*.exe", use = "open" },
+
+    # Multiple openers for a single rule
+    { name = "*.html", use = ["open", "edit"] },
+]
+

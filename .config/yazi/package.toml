@@ -1,0 +1,5 @@
+[plugin]
+deps = [{ use = "yazi-rs/plugins:mime-ext", rev = "62f0789" }, { use = "yazi-rs/plugins:max-preview", rev = "62f0789" }, { use = "AnirudhG07/rich-preview", rev = "8be4d27" }, { use = "yazi-rs/plugins:smart-enter", rev = "62f0789" }, { use = "yazi-rs/plugins:smart-filter", rev = "62f0789" }, { use = "Rolv-Apneseth/starship", rev = "247f49d" }, { use = "orhnk/system-clipboard", rev = "7775a80" }]
+
+[flavor]
+deps = []

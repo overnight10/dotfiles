@@ -1,0 +1,270 @@
+{
+    "buckets": [
+        {
+            "Name": "main",
+            "Source": "https://github.com/ScoopInstaller/Main",
+            "Updated": {
+                "value": "\/Date(1734223312000)\/",
+                "DisplayHint": 2,
+                "DateTime": "Saturday, December 14, 2024 7:41:52 PM"
+            },
+            "Manifests": 1348
+        },
+        {
+            "Name": "extras",
+            "Source": "https://github.com/ScoopInstaller/Extras",
+            "Updated": {
+                "value": "\/Date(1734223488000)\/",
+                "DisplayHint": 2,
+                "DateTime": "Saturday, December 14, 2024 7:44:48 PM"
+            },
+            "Manifests": 2106
+        },
+        {
+            "Name": "versions",
+            "Source": "https://github.com/ScoopInstaller/Versions",
+            "Updated": {
+                "value": "\/Date(1734208365000)\/",
+                "DisplayHint": 2,
+                "DateTime": "Saturday, December 14, 2024 3:32:45 PM"
+            },
+            "Manifests": 471
+        },
+        {
+            "Name": "nerd-fonts",
+            "Source": "https://github.com/matthewjberger/scoop-nerd-fonts",
+            "Updated": {
+                "value": "\/Date(1733606504000)\/",
+                "DisplayHint": 2,
+                "DateTime": "Saturday, December 7, 2024 4:21:44 PM"
+            },
+            "Manifests": 345
+        }
+    ],
+    "apps": [
+        {
+            "Info": "",
+            "Source": "main",
+            "Name": "7zip",
+            "Version": "24.09",
+            "Updated": "\/Date(1734119911653)\/"
+        },
+        {
+            "Info": "",
+            "Source": "extras",
+            "Name": "age",
+            "Version": "1.2.0",
+            "Updated": "\/Date(1734216661669)\/"
+        },
+        {
+            "Info": "",
+            "Source": "main",
+            "Name": "bat",
+            "Version": "0.24.0",
+            "Updated": "\/Date(1734196649736)\/"
+        },
+        {
+            "Info": "",
+            "Source": "main",
+            "Name": "btop-lhm",
+            "Version": "1.0.4",
+            "Updated": "\/Date(1734235959033)\/"
+        },
+        {
+            "Info": "",
+            "Source": "main",
+            "Name": "clipboard",
+            "Version": "0.9.0.1",
+            "Updated": "\/Date(1734226231934)\/"
+        },
+        {
+            "Info": "",
+            "Source": "extras",
+            "Name": "discord",
+            "Version": "1.0.9156-20",
+            "Updated": "\/Date(1734216648470)\/"
+        },
+        {
+            "Info": "",
+            "Source": "main",
+            "Name": "fastfetch",
+            "Version": "2.31.0",
+            "Updated": "\/Date(1734194296716)\/"
+        },
+        {
+            "Info": "",
+            "Source": "main",
+            "Name": "fd",
+            "Version": "10.2.0",
+            "Updated": "\/Date(1734136159934)\/"
+        },
+        {
+            "Info": "",
+            "Source": "main",
+            "Name": "ffmpeg",
+            "Version": "7.1",
+            "Updated": "\/Date(1734133993538)\/"
+        },
+        {
+            "Info": "",
+            "Source": "main",
+            "Name": "fzf",
+            "Version": "0.56.3",
+            "Updated": "\/Date(1734136207691)\/"
+        },
+        {
+            "Info": "",
+            "Source": "main",
+            "Name": "ghostscript",
+            "Version": "10.04.0",
+            "Updated": "\/Date(1734136433801)\/"
+        },
+        {
+            "Info": "",
+            "Source": "main",
+            "Name": "git",
+            "Version": "2.47.1",
+            "Updated": "\/Date(1734119932434)\/"
+        },
+        {
+            "Info": "",
+            "Source": "main",
+            "Name": "gsudo",
+            "Version": "2.5.1",
+            "Updated": "\/Date(1734133353455)\/"
+        },
+        {
+            "Info": "",
+            "Source": "main",
+            "Name": "helix",
+            "Version": "24.07",
+            "Updated": "\/Date(1734138449288)\/"
+        },
+        {
+            "Info": "",
+            "Source": "main",
+            "Name": "imagemagick",
+            "Version": "7.1.1-41",
+            "Updated": "\/Date(1734136397535)\/"
+        },
+        {
+            "Info": "",
+            "Source": "main",
+            "Name": "innounp",
+            "Version": "1.76",
+            "Updated": "\/Date(1734136387917)\/"
+        },
+        {
+            "Info": "",
+            "Source": "nerd-fonts",
+            "Name": "JetBrainsMono-NF",
+            "Version": "3.3.0",
+            "Updated": "\/Date(1734133671063)\/"
+        },
+        {
+            "Info": "",
+            "Source": "main",
+            "Name": "jid",
+            "Version": "0.7.6",
+            "Updated": "\/Date(1734136097458)\/"
+        },
+        {
+            "Info": "",
+            "Source": "main",
+            "Name": "jq",
+            "Version": "1.7.1",
+            "Updated": "\/Date(1734136087277)\/"
+        },
+        {
+            "Info": "",
+            "Source": "main",
+            "Name": "less",
+            "Version": "668",
+            "Updated": "\/Date(1734196661212)\/"
+        },
+        {
+            "Info": "",
+            "Source": "main",
+            "Name": "nano",
+            "Version": "7.2-22.1",
+            "Updated": "\/Date(1734138441674)\/"
+        },
+        {
+            "Info": "",
+            "Source": "main",
+            "Name": "nu",
+            "Version": "0.100.0",
+            "Updated": "\/Date(1734119904466)\/"
+        },
+        {
+            "Info": "",
+            "Source": "main",
+            "Name": "poppler",
+            "Version": "24.08.0-0",
+            "Updated": "\/Date(1734136119913)\/"
+        },
+        {
+            "Info": "",
+            "Source": "main",
+            "Name": "ripgrep",
+            "Version": "14.1.1",
+            "Updated": "\/Date(1734136189240)\/"
+        },
+        {
+            "Info": "",
+            "Source": "extras",
+            "Name": "sharex",
+            "Version": "16.1.0",
+            "Updated": "\/Date(1734229852779)\/"
+        },
+        {
+            "Info": "",
+            "Source": "main",
+            "Name": "starship",
+            "Version": "1.21.1",
+            "Updated": "\/Date(1734132036912)\/"
+        },
+        {
+            "Info": "",
+            "Source": "versions",
+            "Name": "steam",
+            "Version": "nightly-20241214",
+            "Updated": "\/Date(1734229447330)\/"
+        },
+        {
+            "Info": "",
+            "Source": "extras",
+            "Name": "vcredist-aio",
+            "Version": "0.85.0",
+            "Updated": "\/Date(1734133569697)\/"
+        },
+        {
+            "Info": "",
+            "Source": "extras",
+            "Name": "vlc",
+            "Version": "3.0.21",
+            "Updated": "\/Date(1734138780659)\/"
+        },
+        {
+            "Info": "",
+            "Source": "versions",
+            "Name": "windows-terminal-preview",
+            "Version": "1.22.3232.0",
+            "Updated": "\/Date(1734123358396)\/"
+        },
+        {
+            "Info": "",
+            "Source": "main",
+            "Name": "yazi",
+            "Version": "0.4.1",
+            "Updated": "\/Date(1734133102412)\/"
+        },
+        {
+            "Info": "",
+            "Source": "main",
+            "Name": "zoxide",
+            "Version": "0.9.6",
+            "Updated": "\/Date(1734136260932)\/"
+        }
+    ]
+}
