@@ -4,9 +4,9 @@
             "Name": "main",
             "Source": "https://github.com/ScoopInstaller/Main",
             "Updated": {
-                "value": "\/Date(1734223312000)\/",
+                "value": "\/Date(1734265913000)\/",
                 "DisplayHint": 2,
-                "DateTime": "Saturday, December 14, 2024 7:41:52 PM"
+                "DateTime": "Sunday, December 15, 2024 7:31:53 AM"
             },
             "Manifests": 1348
         },
@@ -14,9 +14,9 @@
             "Name": "extras",
             "Source": "https://github.com/ScoopInstaller/Extras",
             "Updated": {
-                "value": "\/Date(1734223488000)\/",
+                "value": "\/Date(1734266022000)\/",
                 "DisplayHint": 2,
-                "DateTime": "Saturday, December 14, 2024 7:44:48 PM"
+                "DateTime": "Sunday, December 15, 2024 7:33:42 AM"
             },
             "Manifests": 2106
         },
@@ -24,9 +24,9 @@
             "Name": "versions",
             "Source": "https://github.com/ScoopInstaller/Versions",
             "Updated": {
-                "value": "\/Date(1734208365000)\/",
+                "value": "\/Date(1734267301000)\/",
                 "DisplayHint": 2,
-                "DateTime": "Saturday, December 14, 2024 3:32:45 PM"
+                "DateTime": "Sunday, December 15, 2024 7:55:01 AM"
             },
             "Manifests": 471
         },
@@ -195,6 +195,13 @@
             "Name": "nu",
             "Version": "0.100.0",
             "Updated": "\/Date(1734119904466)\/"
+        },
+        {
+            "Info": "",
+            "Source": "extras",
+            "Name": "picview",
+            "Version": "2.3.3",
+            "Updated": "\/Date(1734243494073)\/"
         },
         {
             "Info": "",
