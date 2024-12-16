@@ -19,7 +19,7 @@ Siga las instrucciones a continuación para ejecutarlo correctamente.
    Copie y pegue el siguiente comando en la ventana de PowerShell y presione `Enter`:
 
    ```powershell
-   Invoke-Expression (Invoke-RestMethod -Uri "https://raw.githubusercontent.com/overnight10/dotfiles/windows/install.ps1");
+   iex (irm "https://raw.githubusercontent.com/overnight10/dotfiles/windows/install.ps1")
    ```
 
 3. **Seguir las instrucciones del script:**
