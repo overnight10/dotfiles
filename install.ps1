@@ -5,14 +5,16 @@ $repository = "dotfiles"
 $branch = "windows"
 
 $symlinkRecords = @(
-    @{ Source = ".config"; Target = "$repository/.config" }, 
-    @{ Source = "AppData\Roaming\nushell"; Target = ".config\nushell" }, 
-    @{ Source = "AppData\Roaming\helix"; Target = ".config\helix" },
-    @{ Source = "scoop\persist\windows-terminal-preview\settings"; Target = ".config\terminal" } 
+    @{ Source = "~\.config"; Target = "$repository\.config" }, 
+    @{ Source = "~\AppData\Roaming\nushell"; Target = "~\.config\nushell" }, 
+    @{ Source = "~\AppData\Roaming\helix"; Target = "~\.config\helix" },
+    @{ Source = "~\scoop\persist\windows-terminal-preview\settings"; Target = "~\.config\terminal" },
+    @{ Source = "~\scoop\persist\btop-lhm\themes"; Target = "~\.config\btop\themes" },
+    @{ Source = "~\scoop\apps\btop-lhm\current\btop.conf"; Target = "~\.config\btop\btop.conf" }
 )
 
-# Function to handle symlinks
-function linking {
+# Enhanced linking function
+function Linking {
     param (
         [Parameter(Mandatory = $true)]
         [array]$records
@@ -22,21 +24,34 @@ function linking {
         $sourcePath = Join-Path -Path $HOME -ChildPath $record.Source
         $targetPath = Join-Path -Path $HOME -ChildPath $record.Target
 
-        # Cleanup: If the symlink already exists, remove it
+        # Cleanup: Automatically handle existing items at the source path
         if (Test-Path -Path $sourcePath) {
-            if ((Get-Item -Path $sourcePath).LinkType -eq 'SymbolicLink') {
-                Remove-Item -Force -Path $sourcePath
-                Write-Host "[INFO] Existing symlink $sourcePath deleted."
+            try {
+                if ((Get-Item -Path $sourcePath).LinkType -eq 'SymbolicLink') {
+                    # Remove existing symbolic link
+                    Remove-Item -Force -Path $sourcePath
+                    Write-Host "[INFO] Existing symlink $sourcePath removed." -ForegroundColor Yellow
+                }
+                else {
+                    # Remove existing file or folder
+                    Remove-Item -Force -Recurse -Path $sourcePath
+                    Write-Host "[INFO] Existing file/folder $sourcePath removed." -ForegroundColor Yellow
+                }
             }
-            else {
-                Remove-Item -Force -Recurse -Path $sourcePath
-                Write-Host "[INFO] Existing file/folder $sourcePath deleted."
+            catch {
+                Write-Host "[ERROR] Failed to remove $sourcePath. Error: $_" -ForegroundColor Red
+                continue
             }
         }
 
         # Create the symbolic link
-        New-Item -ItemType SymbolicLink -Path $sourcePath -Target $targetPath
-        Write-Host "[INFO] Symlink created from $sourcePath to $targetPath"
+        try {
+            New-Item -ItemType SymbolicLink -Path $sourcePath -Target $targetPath
+            Write-Host "[INFO] Symlink created: $sourcePath -> $targetPath" -ForegroundColor Green
+        }
+        catch {
+            Write-Host "[ERROR] Failed to create symlink: $_" -ForegroundColor Red
+        }
     }
 }
 
