@@ -22,7 +22,14 @@ Siga las instrucciones a continuación para ejecutarlo correctamente.
    iex (irm "https://raw.githubusercontent.com/overnight10/dotfiles/windows/install.ps1")
    ```
 
-3. **Seguir las instrucciones del script:**
+
+   ¿Quieres una url más corta?
+   
+   ```powershell
+   iex (irm "https://is.gd/t9upyK")
+   ```
+
+4. **Seguir las instrucciones del script:**
    - El script descargará y aplicará configuraciones en su sistema.
    - Asegúrese de seguir cualquier indicación que aparezca durante el proceso.
 
