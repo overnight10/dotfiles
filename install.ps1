@@ -132,8 +132,7 @@ function main {
             New-Item -Force -ItemType Directory -Path $repository | Out-Null
             New-Item -Force -ItemType Directory -Path "$repository\.config" | Out-Null
         }
-    }
-    else {
+    } else {
         # Check if the dotfiles directory exists
         if (Test-Path -Path $repository) {
             Write-Host "[INFO] Dotfiles directory found."
@@ -158,6 +157,31 @@ function main {
 
         Write-Host "[INFO] Cloning dotfiles repository..."
         git clone "https://github.com/$user/$repository.git" -b $branch
+    }
+
+    $ssh = which ssh
+    if (!$ssh) {
+        # ask if the user wants to install SSH
+        # if not, continue
+        $installSsh = Read-Host "Do you want to install SSH? (y/n)"
+        if ($installSsh -ne "y") {
+            Write-Host "[INFO] SSH not installed. Continuing..."
+        }
+        else {
+            scoop install openssh
+            $ssh = which ssh
+            if (!$ssh) {
+                Write-Error "[ERROR] SSH installation failed!"
+                Set-Location ~
+                exit 1
+            }
+            else {
+                $installer = "$home\\scoop\\apps\\openssh\\current\\install-sshd.ps1"
+                Write-Host "[INFO] Installing SSH server..."
+                Invoke-Expression "& $installer"
+                Write-Host "[INFO] SSH server installed!"
+            }
+        }
     }
 
     # Call the function to create symlinks

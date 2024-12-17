@@ -4,9 +4,9 @@
             "Name": "main",
             "Source": "https://github.com/ScoopInstaller/Main",
             "Updated": {
-                "value": "\/Date(1734265913000)\/",
+                "value": "\/Date(1734395942000)\/",
                 "DisplayHint": 2,
-                "DateTime": "Sunday, December 15, 2024 7:31:53 AM"
+                "DateTime": "Monday, December 16, 2024 7:39:02 PM"
             },
             "Manifests": 1348
         },
@@ -14,9 +14,9 @@
             "Name": "extras",
             "Source": "https://github.com/ScoopInstaller/Extras",
             "Updated": {
-                "value": "\/Date(1734266022000)\/",
+                "value": "\/Date(1734396091000)\/",
                 "DisplayHint": 2,
-                "DateTime": "Sunday, December 15, 2024 7:33:42 AM"
+                "DateTime": "Monday, December 16, 2024 7:41:31 PM"
             },
             "Manifests": 2106
         },
@@ -24,9 +24,9 @@
             "Name": "versions",
             "Source": "https://github.com/ScoopInstaller/Versions",
             "Updated": {
-                "value": "\/Date(1734267301000)\/",
+                "value": "\/Date(1734382510000)\/",
                 "DisplayHint": 2,
-                "DateTime": "Sunday, December 15, 2024 7:55:01 AM"
+                "DateTime": "Monday, December 16, 2024 3:55:10 PM"
             },
             "Manifests": 471
         },
@@ -34,9 +34,9 @@
             "Name": "nerd-fonts",
             "Source": "https://github.com/matthewjberger/scoop-nerd-fonts",
             "Updated": {
-                "value": "\/Date(1733606504000)\/",
+                "value": "\/Date(1734387664000)\/",
                 "DisplayHint": 2,
-                "DateTime": "Saturday, December 7, 2024 4:21:44 PM"
+                "DateTime": "Monday, December 16, 2024 5:21:04 PM"
             },
             "Manifests": 345
         }
@@ -109,8 +109,8 @@
             "Info": "",
             "Source": "main",
             "Name": "fzf",
-            "Version": "0.56.3",
-            "Updated": "\/Date(1734136207691)\/"
+            "Version": "0.57.0",
+            "Updated": "\/Date(1734415557610)\/"
         },
         {
             "Info": "",
@@ -198,6 +198,13 @@
         },
         {
             "Info": "",
+            "Source": "main",
+            "Name": "openssh",
+            "Version": "9.8.1.0p1",
+            "Updated": "\/Date(1734415772357)\/"
+        },
+        {
+            "Info": "",
             "Source": "extras",
             "Name": "picview",
             "Version": "2.3.3",
@@ -213,6 +220,13 @@
         {
             "Info": "",
             "Source": "main",
+            "Name": "portal",
+            "Version": "1.2.3",
+            "Updated": "\/Date(1734416947711)\/"
+        },
+        {
+            "Info": "",
+            "Source": "main",
             "Name": "ripgrep",
             "Version": "14.1.1",
             "Updated": "\/Date(1734136189240)\/"
@@ -223,6 +237,13 @@
             "Name": "sharex",
             "Version": "16.1.0",
             "Updated": "\/Date(1734229852779)\/"
+        },
+        {
+            "Info": "",
+            "Source": "extras",
+            "Name": "sshs",
+            "Version": "4.5.1",
+            "Updated": "\/Date(1734415584945)\/"
         },
         {
             "Info": "",
