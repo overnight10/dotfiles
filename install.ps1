@@ -105,6 +105,12 @@ function try_clone_repo {
         return $false
     }
 
+    # remove the repository directory if it exists
+    if (Test-Path -Path $repository) {
+        Remove-Item -Force -Path $repository -Recurse
+        Write-Host "`u{1F5D1}`u{FE0F} Removed existing repository: $repository"
+    }
+
     Write-Host "`u{1F431} Cloning repository..."
     git clone "https://github.com/$user/$repository.git" -b $branch $repository
     if (!(Test-Path -Path $repository)) {
