@@ -109,7 +109,7 @@ function try_clone_repo {
     git clone "https://github.com/$user/$repository.git" -b $branch $repository
     if (!(Test-Path -Path $repository)) {
         Write-Host "`u{1F4DB} Failed to clone repository: $repository"
-        return $false
+        return false
     }
 
     return true
