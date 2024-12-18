@@ -212,10 +212,24 @@ function try_install_scoop {
     Write-Host "`u{1F4E6} Fetching scoop.json from repository"
     Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$user/$repository/$branch/assets/scoop.json" -OutFile $outputFile
     $buckets = Get-Content -Path $outputFile | ConvertFrom-Json | Select-Object -ExpandProperty buckets | Select-Object -ExpandProperty Name
+    $knownedBuckets = scoop bucket list | Select-Object -ExpandProperty Name
+
     foreach ($bucket in $buckets) {
-        scoop bucket add $bucket
+        # only add buckets that are not already known
+        if (!($knownedBuckets -contains $bucket)) {
+            scoop bucket add $bucket
+        }
     }
-    scoop import $outputFile
+
+    $installedApps = scoop list | Select-Object -ExpandProperty Name
+    $apps = Get-Content -Path $outputFile | ConvertFrom-Json | Select-Object -ExpandProperty apps | Select-Object -ExpandProperty Name
+    foreach ($app in $apps) {
+        # only install apps that are not already installed
+        if (!($installedApps -contains $app)) {
+            scoop install $app
+        }
+    }
+
     Write-Host "`u{1F4E6} Scoop packages installed!"
     return $true
 }
