@@ -218,10 +218,8 @@ function main {
         $overwrite = yes_or_no -title "Local dotfiles exist" -question "Do you want to overwrite the existing dotfiles?"
         if (!($overwrite)) {
             handle_local_dotfiles
+            return
         }
-        Set-Location ~
-        Write-Host "`u{1F408} Ok, nothing to do."
-        return
     }
 
     handle_remote_dotfiles
