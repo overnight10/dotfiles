@@ -141,10 +141,6 @@ function handle_local_dotfiles {
     foreach ($link in $links) {
         restore_file -file $link.Source -backupDir $backupDir
     }
-    Write-Host "`u{1F5D1}`u{FE0F} Removing backup directory..."
-    Remove-Item -Force -Path $backupDir
-
-    Write-Host "`u{1F389} Done!"
 }
 
 function handle_remote_dotfiles {
@@ -167,11 +163,6 @@ function handle_remote_dotfiles {
     foreach ($file in $preserve) {
         restore_file -file $file -backupDir $backupDir
     }
-
-    Write-Host "`u{1F5D1}`u{FE0F} Removing backup directory..."
-    Remove-Item -Force -Path $backupDir
-    Set-Location ~
-    Write-Host "`u{1F389} Done!"
 }
 
 function try_install_scoop {
@@ -241,4 +232,5 @@ catch {
     Remove-Item -Force -Path $tempDir
     Remove-Item -Force -Path $backupDir
     Set-Location ~
+    Write-Host "Done"
 }
