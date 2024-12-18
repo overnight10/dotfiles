@@ -102,17 +102,17 @@ function try_clone_repo {
         }
         Write-Host "`u{1F408} Hey, I can't do that for you. Exiting..."
         Set-Location ~
-        return false
+        return $false
     }
 
     Write-Host "`u{1F431} Cloning repository..."
     git clone "https://github.com/$user/$repository.git" -b $branch $repository
     if (!(Test-Path -Path $repository)) {
         Write-Host "`u{1F4DB} Failed to clone repository: $repository"
-        return false
+        return $false
     }
 
-    return true
+    return $true
 }
 
 function handle_local_dotfiles {
@@ -176,13 +176,13 @@ function try_install_scoop {
         }
         Write-Host "`u{1F408} Hey, I can't do that for you. Exiting..."
         Set-Location ~
-        return false
+        return $false
     }
     Write-Host "`u{1F431} Scoop is installed!"
     $continue = yes_or_no -title "Apps and buckets" -question "Do you want to use remote scoop.json?"
     if (!($continue)) {
         Write-Host "`u{1F408} Ok, I'll pass."
-        return true
+        return $true
     }
     $outputFile = Join-Path -Path $pwd -ChildPath "scoop.json"
     Write-Host "`u{1F4E6} Fetching scoop.json from repository"
@@ -193,7 +193,7 @@ function try_install_scoop {
     }
     scoop import $outputFile
     Write-Host "`u{1F4E6} Scoop packages installed!"
-    return true
+    return $true
 }
 
 function main {
