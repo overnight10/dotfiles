@@ -3,212 +3,247 @@
 $user = "overnight10"
 $repository = "dotfiles"
 $branch = "windows"
+$backupDir = "~\.backup"
 
-$symlinkRecords = @(
-    @{ Source = "~\.config"; Target = "$repository\.config" }, 
-    @{ Source = "~\AppData\Roaming\nushell"; Target = "~\.config\nushell" }, 
+$links = @(
+    @{ Source = "~\.config"; Target = "$repository\.config" },
+    @{ Source = "~\AppData\Roaming\nushell"; Target = "~\.config\nushell" },
     @{ Source = "~\AppData\Roaming\helix"; Target = "~\.config\helix" },
     @{ Source = "~\scoop\persist\windows-terminal-preview\settings"; Target = "~\.config\terminal" },
     @{ Source = "~\scoop\persist\btop-lhm\themes"; Target = "~\.config\btop\themes" },
     @{ Source = "~\scoop\apps\btop-lhm\current\btop.conf"; Target = "~\.config\btop\btop.conf" }
 )
 
-# Enhanced linking function
-function linking {
+$preserve = @(
+    "~\.config\nushell\history.txt"
+)
+
+function yes_or_no {
     param (
-        [Parameter(Mandatory = $true)]
-        [array]$records
+        [Parameter(Mandatory = $true)] [string] $title,
+        [Parameter(Mandatory = $true)] [string] $question
     )
+    $choices = @(
+        [System.Management.Automation.Host.ChoiceDescription]::new("&Yes", "Answer yes to $question."),
+        [System.Management.Automation.Host.ChoiceDescription]::new("&No", "Answer no to $question.")
+    )
+    $decision = $Host.UI.PromptForChoice($title, $question, $choices, 0)
+    return $decision -eq 0
+}
 
-    foreach ($record in $records) {
-        $exists = Test-Path -Path $record.Source
-        if (!$exists) {
-            continue
-        }
-        # Cleanup: Automatically handle existing items at the source path
-        try {
-            if ((Get-Item -Path $record.Source).LinkType -eq 'SymbolicLink') {
-                # Remove existing symbolic link
-                Remove-Item -Force -Path $record.Source
-                Write-Host "[INFO] Existing symlink $record.Source removed." -ForegroundColor Yellow
-            }
-            else {
-                # Remove existing file or folder
-                Remove-Item -Force -Recurse -Path $record.Source
-                Write-Host "[INFO] Existing file/folder $record.Source removed." -ForegroundColor Yellow
-            }
-        }
-        catch {
-            Write-Host "[ERROR] Failed to remove $record.Source. Error: $_" -ForegroundColor Red
-            continue
-        }
+function create_symlink (
+    [Parameter(Mandatory = $true)]
+    [string] $source,
+    [Parameter(Mandatory = $true)]
+    [string] $target
+) {
+    # if source doesn't exist or target doesn't exist, skip
+    if (!(Test-Path -Path $source) -or !(Test-Path -Path $target)) {
+        return
+    }
+    # check if it has a symlink
+    if ((Get-Item -Path $link.Source).LinkType -eq 'SymbolicLink') {
+        # if it is the same, skip
+        if ((Get-Item -Path $link.Source).Target -eq $link.Target) {
+            return
+        }  
+        # if it is different, remove it
+        Remove-Item -Force -Path $link.Source
+        Write-Host "🗑️ Symlink removed: $($link.Source) -> $($link.Target)"
+    }
 
-        # Create the symbolic link
-        try {
-            New-Item -ItemType SymbolicLink -Path $record.Source -Target $record.Target
-            Write-Host "[INFO] Symlink created: $record.Source -> $record.Target" -ForegroundColor Green
-        }
-        catch {
-            Write-Host "[ERROR] Failed to create symlink: $_" -ForegroundColor Red
-        }
+    try {
+        # create the symlink
+        New-Item -ItemType SymbolicLink -Path $link.Source -Target $link.Target -Force -Confirm:$false | Out-Null
+        Write-Host "🔗 Symlink created: $($link.Source) -> $($link.Target)"
+    }
+    catch {
+        Write-Host "📛 Failed to create symlink: $($link.Source) -> $($link.Target)" -ForegroundColor Red
     }
 }
 
-function which($command) {
-    Get-Command $command -ErrorAction SilentlyContinue
+function preserve_file {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string] $file,
+        [Parameter(Mandatory = $true)]
+        [string] $backupDir
+    )
+    if (!(Test-Path -Path $file)) {
+        return
+    }
+    # I assume that the backup directory exists
+    # copy the file to the backup directory
+    Copy-Item -Path $file -Destination $backupDir -Force -Confirm:$false
+    Write-Host "📄 File preserved: $($file) -> $($backupDir)"
+}
+
+function restore_file {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string] $file,
+        [Parameter(Mandatory = $true)]
+        [string] $backupDir
+    )
+    if (!(Test-Path -Path $file)) {
+        return
+    }
+    # I assume that the backup directory exists
+    # copy the file to the backup directory
+    Copy-Item -Path $backupDir -Destination $file -Force -Confirm:$false
+    Write-Host "📄 File restored: $($file) -> $($backupDir)"
+}
+
+function handle_local_dotfiles {
+    # backup the local dotfiles
+    Write-Host "📦 Backing up local dotfiles..."
+    foreach ($link in $links) {
+        preserve_file -file $link.Source -backupDir $backupDir
+    }
+
+    $relink = yes_or_no -title "Update symlinks" -question "Do you want it?"
+    if (!($relink)) {
+        Write-Host "🐈 Ok, I'll pass."
+        return
+    }
+
+    # create symlinks
+    Write-Host "🔗 Creating symlinks..."
+    foreach ($link in $links) {
+        create_symlink -source $link.Source -target $link.Target
+    }
+    # restore the local dotfiles
+    Write-Host "📦 Restoring local dotfiles..."
+    foreach ($link in $links) {
+        restore_file -file $link.Source -backupDir $backupDir
+    }
+    # remove the backup directory
+    Write-Host "🗑️ Removing backup directory..."
+    Remove-Item -Force -Path $backupDir
+
+    # done
+    Write-Host "🎉 Done!"
+}
+
+function handle_remote_dotfiles {
+    # backup the local dotfiles
+    Write-Host "📦 Backing up local files..."
+    foreach ($file in $preserve) {
+        preserve_file -file $file -backupDir $backupDir
+    }
+
+    $clonned = try_clone_repo
+    if (!$clonned) {
+        Set-Location ~
+        return
+    }
+
+    # create symlinks
+    Write-Host "🔗 Creating symlinks..."
+    foreach ($link in $links) {
+        create_symlink -source $link.Source -target $link.Target
+    }
+    # restore the local dotfiles
+    Write-Host "📦 Restoring local files..."
+    foreach ($file in $preserve) {
+        restore_file -file $file -backupDir $backupDir
+    }
+
+    # remove the backup directory
+    Write-Host "🗑️ Removing backup directory..."
+    Remove-Item -Force -Path $backupDir
+    # done
+    Set-Location ~
+    Write-Host "🎉 Done!"
+}
+
+funtion try_clone_repo {
+    # check if git is installed
+    if (!(which git)) {
+        $decision = yes_or_no -title "Git not installed" -question "Do you want to install git via scoop?"
+        if ($decision -eq $true) {
+            scoop install git
+        }
+        Write-Host "🐈 Hey, I can't do that for you. Exiting..."
+        Set-Location ~
+        return false
+    }
+
+    # at this point, I will asume that you want to clone the repository
+    # check if the repository exists
+    Write-Host "🐱 Cloning repository..."
+    git clone "https://github.com/$user/$repository.git" -b $branch $repository
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "📛 Failed to clone repository: $($repository)" -ForegroundColor Red
+        return false
+    }
+
+    return true
+}
+
+function try_install_scoop {
+    # check if git is installed
+    if (!(which scoop)) {
+        $decision = yes_or_no -title "Scoop not installed" -question "Do you want to install scoop?"
+        if ($decision -eq $true) {
+            Invoke-Expression "& {$(Invoke-RestMethod get.scoop.sh)} -RunAsAdmin"
+        }
+        Write-Host "🐈 Hey, I can't do that for you. Exiting..."
+        Set-Location ~
+        return 
+    }
+    Write-Host "🐱 Scoop is installed!"
+    # So we can use remote scoop.json (contains apps and buckets)
+    # Or we can use local scoop.json (contains apps and buckets)
+    $continue = yes_or_no -title "Apps and buckets" -question "Do you want to use remote scoop.json?"
+    if (!($continue)) {
+        Write-Host "🐈 Ok, I'll pass."
+        return
+    }
+    $outputFile = Join-Path -Path $pwd -ChildPath "scoop.json"
+    # use remote scoop.json, overwrite local scoop.json
+    Write-Host "📦 Fetching scoop.json from repository"
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$user/$repository/$branch/assets/scoop.json" -OutFile $outputFile
+    # before to import, we need to add all buckets
+    # otherwise, scoop will fail to import
+    $buckets = Get-Content -Path $outputFile | ConvertFrom-Json | Select-Object -ExpandProperty buckets | Select-Object -ExpandProperty Name
+    foreach ($bucket in $buckets) {
+        scoop bucket add $bucket
+    }
+    scoop import $outputFile
+    Write-Host "📦 Scoop packages installed!"
 }
 
 function main {
     Set-Location ~  # Go to the user's home directory
 
     # Create temporary directory for scoop.json
-    mkdir -Force .temp | Out-Null
-    Set-Location .temp
+    $tempDir = Join-Path -Path $pwd -ChildPath ".temp-dotfiles"
+    mkdir -Force $tempDir | Out-Null
+    Set-Location $tempDir
 
     # Check if Scoop is installed
-    $scoop = which scoop
-    if (!$scoop) {
-        Write-Host "[INFO] Scoop not found. Installing..."
-        Invoke-Expression "& {$(Invoke-RestMethod get.scoop.sh)} -RunAsAdmin"
-        $scoop = which scoop
-        if (!$scoop) {
-            Write-Error "[ERROR] Scoop installation failed!"
-            Set-Location ~
-            exit 1
+    try_install_scoop
+    
+    # check if local dotfiles exist
+    if (Test-Path -Path $repository) {
+        $overwrite = yes_or_no -title "Local dotfiles exist" -question "Do you want to overwrite the existing dotfiles?"
+        if (!($overwrite)) {
+            handle_local_dotfiles
         }
-        else {
-            Write-Host "[INFO] Scoop installed successfully!"
-        }
+        Set-Location ~
+        Write-Host "🐈 Ok, nothing to do."
+        return
     }
 
-    # Path for scoop.json
-    $outputFile = Join-Path -Path $pwd -ChildPath "scoop.json"
-    Write-Host "[INFO] Fetching scoop.json from repository"
-
-    try {
-        Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$user/$repository/$branch/assets/scoop.json" -OutFile $outputFile
-        scoop import $outputFile
-        Write-Host "[INFO] Scoop packages installed!"
-    }
-    catch {
-        Write-Host "[ERROR] Unable to fetch scoop.json."
-        $continue = Read-Host "Do you want to continue without scoop.json? (y/n)"
-        if ($continue -ne "y") {
-            Write-Host "[INFO] Installation cancelled."
-            Set-Location ~
-            exit 1
-        }
-        else {
-            Write-Host "[INFO] Continuing without scoop.json."
-        }
-    }
-
-    # Cleanup: Remove temporary directory
-    Set-Location ~
-    Remove-Item -Force -Recurse -Path .temp
-    Write-Host "[INFO] Temp directory deleted."
-
-    # Check if Git is installed
-    $git = which git
-    if (!$git) {
-        Write-Error "[ERROR] Git is not installed!"
-        scoop install git
-        $git = which git
-        if (!$git) {
-            Write-Error "[ERROR] Unable to install Git via Scoop."
-        }
-        else {
-            git config --global --add safe.directory $home\\scoop\\buckets\\versions
-        }
-        $continue = Read-Host "Do you want to continue with a blank template? (y/n)"
-        if ($continue -ne "y") {
-            Write-Host "[INFO] Installation cancelled."
-            Set-Location ~
-            exit 1
-        }
-        else {
-            Write-Host "[INFO] Creating dotfiles directory"
-            # Create necessary directories
-            New-Item -Force -ItemType Directory -Path $repository | Out-Null
-            New-Item -Force -ItemType Directory -Path "$repository\.config" | Out-Null
-        }
-    } else {
-        # Check if the dotfiles directory exists
-        if (Test-Path -Path $repository) {
-            Write-Host "[INFO] Dotfiles directory found."
-            $overwrite = Read-Host "Do you want to overwrite the existing dotfiles? (y/n)"
-            if ($overwrite -ne "y") {
-                Write-Host "[INFO] Continuing with local dotfiles."
-                $createSymlinks = Read-Host "Do you want to create symlinks? (y/n)"
-                if ($createSymlinks -eq "y") {
-                    Write-Host "[INFO] Creating symlinks..."
-                    linking -records $symlinkRecords
-                    Write-Host "[INFO] Symlinks created!"
-                }
-                Set-Location ~
-                exit 0
-            }
-            else {
-                # User chose to overwrite
-                Remove-Item -Force -Recurse -Path $repository
-                Write-Host "[INFO] Existing dotfiles directory deleted."
-            }
-        }
-
-        Write-Host "[INFO] Cloning dotfiles repository..."
-        git clone "https://github.com/$user/$repository.git" -b $branch
-    }
-
-    $ssh = which ssh
-    if (!$ssh) {
-        # ask if the user wants to install SSH
-        # if not, continue
-        $installSsh = Read-Host "Do you want to install SSH? (y/n)"
-        if ($installSsh -ne "y") {
-            Write-Host "[INFO] SSH not installed. Continuing..."
-        }
-        else {
-            scoop install openssh
-            $ssh = which ssh
-            if (!$ssh) {
-                Write-Error "[ERROR] SSH installation failed!"
-                Set-Location ~
-                exit 1
-            }
-            else {
-                $installer = "$home\\scoop\\apps\\openssh\\current\\install-sshd.ps1"
-                Write-Host "[INFO] Installing SSH server..."
-                Invoke-Expression "& $installer"
-                Write-Host "[INFO] SSH server installed!"
-            }
-        }
-    }
-
-    # Call the function to create symlinks
-    linking -records $symlinkRecords
-
-    Write-Host "[INFO] Dotfiles installed!"
-    Set-Location ~
+    handle_remote_dotfiles
 }
 
-# Call the main function and wrap it in a try/catch block
 try {
-    if ($PSVersionTable.PSVersion.Major -lt 5) {
-        Write-Error "[ERROR] PowerShell 5 or higher is required to run this script."
-        Set-Location ~
-        exit 1
-    }
-    
-    $currentPolicy = Get-ExecutionPolicy -Scope CurrentUser
-    if ($currentPolicy -ne 'RemoteSigned') {
-        Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
-        Write-Host "[INFO] Execution policy set to RemoteSigned."
-    }
     main
 }
 catch {
-    # Handle errors and clean up
+    Write-Host "📛 Failed to install dotfiles: $($_.Exception.Message)" -ForegroundColor Red
     Set-Location ~
-    Write-Error "[ERROR] An error occurred: $_"
-    Write-Host "[INFO] Returning to home directory."
+    exit 1
 }
