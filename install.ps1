@@ -4,7 +4,7 @@ $user = "overnight10"
 $repository = "dotfiles"
 $branch = "windows"
 $backupDir = "~\.backup"
-$tempDir = Join-Path -Path $pwd -ChildPath ".temp-dotfiles"
+$tempDir = "~\.temp-dotfiles"
 
 $receipts = @(
     $backupDir
@@ -194,7 +194,7 @@ function try_install_scoop {
         Write-Host "`u{1F408} Ok, I'll pass."
         return $true
     }
-    $outputFile = Join-Path -Path $pwd -ChildPath "scoop.json"
+    $outputFile = "$($tempDir)\scoop.json"
     Write-Host "`u{1F4E6} Fetching scoop.json from repository"
     Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$user/$repository/$branch/assets/scoop.json" -OutFile $outputFile
     $buckets = Get-Content -Path $outputFile | ConvertFrom-Json | Select-Object -ExpandProperty buckets | Select-Object -ExpandProperty Name
@@ -212,7 +212,6 @@ function create_receipt {
         [string] $receip
     )
     if ((Test-Path -Path $receip)) {
-        Write-Host "`u{1F4C1} Directory already exists: $receip"
         return
     }
     New-Item -ItemType Directory -Path $receip -Force | Out-Null
