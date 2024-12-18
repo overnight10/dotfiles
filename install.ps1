@@ -80,6 +80,19 @@ function create_symlink (
     }
 }
 
+function remove_symlink {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string] $source
+    )
+    if (!(Test-Path -Path $source)) {
+        return
+    }
+
+    Remove-Item -Force -Path $source
+    Write-Host "`u{1F5D1}`u{FE0F} Symlink removed: $source"
+}
+
 function preserve_file {
     param (
         [Parameter(Mandatory = $true)]
@@ -248,6 +261,13 @@ try {
 }
 catch {
     Write-Output "`u{1F4DB} Failed to install dotfiles: $($_.Exception.Message)"
+    foreach ($link in $links) {
+        remove_symlink -source $link.Source
+    }
+    # restore local files
+    foreach ($file in $preserve) {
+        restore_file -file $file -backupDir $backupDir
+    }
 } finally {
     Write-Host "`u{1F9F9} Cleaning up..."
     Remove-Item -Force -Path $tempDir
