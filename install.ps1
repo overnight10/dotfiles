@@ -9,7 +9,8 @@ $tempDir = Join-Path -Path $pwd -ChildPath ".temp-dotfiles"
 $receipts = @(
     $backupDir
     $tempDir
-    '~/.config'
+    '~\.config'
+    '~\.config\scoop'
     '~\AppData'
     '~\AppData\Roaming'
     '~\AppData\Roaming\nushell'
@@ -211,6 +212,7 @@ function create_receipt {
         [string] $receip
     )
     if ((Test-Path -Path $receip)) {
+        Write-Host "`u{1F4C1} Directory already exists: $receip"
         return
     }
     New-Item -ItemType Directory -Path $receip -Force | Out-Null
