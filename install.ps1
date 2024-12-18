@@ -97,12 +97,12 @@ function restore_file {
 function try_clone_repo {
     if (!(which git)) {
         $decision = yes_or_no -title "Git not installed" -question "Do you want to install git via scoop?"
-        if ($decision -eq $true) {
+        if ($decision) {
             scoop install git
         }
         Write-Host "`u{1F408} Hey, I can't do that for you. Exiting..."
         Set-Location ~
-        return $false
+        return false
     }
 
     Write-Host "`u{1F431} Cloning repository..."
@@ -112,7 +112,7 @@ function try_clone_repo {
         return $false
     }
 
-    return $true
+    return true
 }
 
 function handle_local_dotfiles {
