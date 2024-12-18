@@ -4,6 +4,7 @@ $user = "overnight10"
 $repository = "dotfiles"
 $branch = "windows"
 $backupDir = "~\.backup"
+$tempDir = Join-Path -Path $pwd -ChildPath ".temp-dotfiles"
 
 $links = @(
     @{ Source = "~\.config"; Target = "$repository\.config" },
@@ -17,6 +18,14 @@ $links = @(
 $preserve = @(
     "~\.config\nushell\history.txt"
 )
+
+function which {
+    param (
+        [Parameter(Mandatory = $true)] [string] $program
+    )
+    $path = Get-Command -Name $program -CommandType Application -ErrorAction SilentlyContinue
+    return $null -ne $path
+}
 
 function yes_or_no {
     param (
@@ -37,28 +46,23 @@ function create_symlink (
     [Parameter(Mandatory = $true)]
     [string] $target
 ) {
-    # if source doesn't exist or target doesn't exist, skip
     if (!(Test-Path -Path $source) -or !(Test-Path -Path $target)) {
         return
     }
-    # check if it has a symlink
-    if ((Get-Item -Path $link.Source).LinkType -eq 'SymbolicLink') {
-        # if it is the same, skip
-        if ((Get-Item -Path $link.Source).Target -eq $link.Target) {
+    if ((Get-Item -Path $source).LinkType -eq 'SymbolicLink') {
+        if ((Get-Item -Path $source).Target -eq $target) {
             return
         }  
-        # if it is different, remove it
-        Remove-Item -Force -Path $link.Source
-        Write-Host "🗑️ Symlink removed: $($link.Source) -> $($link.Target)"
+        Remove-Item -Force -Path $source
+        Write-Host "`u{1F5D1}`u{FE0F} Symlink removed: $source -> $target"
     }
 
     try {
-        # create the symlink
-        New-Item -ItemType SymbolicLink -Path $link.Source -Target $link.Target -Force -Confirm:$false | Out-Null
-        Write-Host "🔗 Symlink created: $($link.Source) -> $($link.Target)"
+        New-Item -ItemType SymbolicLink -Path $source -Target $target -Force -Confirm:$false | Out-Null
+        Write-Host "`u{1F517} Symlink created: $source -> $target"
     }
     catch {
-        Write-Host "📛 Failed to create symlink: $($link.Source) -> $($link.Target)" -ForegroundColor Red
+        Write-Output "`u{1F4DB} Failed to create symlink: $source -> $target"
     }
 }
 
@@ -72,10 +76,8 @@ function preserve_file {
     if (!(Test-Path -Path $file)) {
         return
     }
-    # I assume that the backup directory exists
-    # copy the file to the backup directory
     Copy-Item -Path $file -Destination $backupDir -Force -Confirm:$false
-    Write-Host "📄 File preserved: $($file) -> $($backupDir)"
+    Write-Host "`u{1F4C4} File preserved: $($file) -> $($backupDir)"
 }
 
 function restore_file {
@@ -88,46 +90,59 @@ function restore_file {
     if (!(Test-Path -Path $file)) {
         return
     }
-    # I assume that the backup directory exists
-    # copy the file to the backup directory
     Copy-Item -Path $backupDir -Destination $file -Force -Confirm:$false
-    Write-Host "📄 File restored: $($file) -> $($backupDir)"
+    Write-Host "`u{1F4C4} File restored: $($file) -> $($backupDir)"
+}
+
+function try_clone_repo {
+    if (!(which git)) {
+        $decision = yes_or_no -title "Git not installed" -question "Do you want to install git via scoop?"
+        if ($decision -eq $true) {
+            scoop install git
+        }
+        Write-Host "`u{1F408} Hey, I can't do that for you. Exiting..."
+        Set-Location ~
+        return $false
+    }
+
+    Write-Host "`u{1F431} Cloning repository..."
+    git clone "https://github.com/$user/$repository.git" -b $branch $repository
+    if (!(Test-Path -Path $repository)) {
+        Write-Host "`u{1F4DB} Failed to clone repository: $repository"
+        return $false
+    }
+
+    return $true
 }
 
 function handle_local_dotfiles {
-    # backup the local dotfiles
-    Write-Host "📦 Backing up local dotfiles..."
+    Write-Host "`u{1F4E6} Backing up local dotfiles..."
     foreach ($link in $links) {
         preserve_file -file $link.Source -backupDir $backupDir
     }
 
     $relink = yes_or_no -title "Update symlinks" -question "Do you want it?"
     if (!($relink)) {
-        Write-Host "🐈 Ok, I'll pass."
+        Write-Host "`u{1F408} Ok, I'll pass."
         return
     }
 
-    # create symlinks
-    Write-Host "🔗 Creating symlinks..."
+    Write-Host "`u{1F517} Creating symlinks..."
     foreach ($link in $links) {
         create_symlink -source $link.Source -target $link.Target
     }
-    # restore the local dotfiles
-    Write-Host "📦 Restoring local dotfiles..."
+    Write-Host "`u{1F4E6} Restoring local dotfiles..."
     foreach ($link in $links) {
         restore_file -file $link.Source -backupDir $backupDir
     }
-    # remove the backup directory
-    Write-Host "🗑️ Removing backup directory..."
+    Write-Host "`u{1F5D1}`u{FE0F} Removing backup directory..."
     Remove-Item -Force -Path $backupDir
 
-    # done
-    Write-Host "🎉 Done!"
+    Write-Host "`u{1F389} Done!"
 }
 
 function handle_remote_dotfiles {
-    # backup the local dotfiles
-    Write-Host "📦 Backing up local files..."
+    Write-Host "`u{1F4E6} Backing up local files..."
     foreach ($file in $preserve) {
         preserve_file -file $file -backupDir $backupDir
     }
@@ -138,101 +153,74 @@ function handle_remote_dotfiles {
         return
     }
 
-    # create symlinks
-    Write-Host "🔗 Creating symlinks..."
+    Write-Host "`u{1F517} Creating symlinks..."
     foreach ($link in $links) {
         create_symlink -source $link.Source -target $link.Target
     }
-    # restore the local dotfiles
-    Write-Host "📦 Restoring local files..."
+    Write-Host "`u{1F4E6} Restoring local files..."
     foreach ($file in $preserve) {
         restore_file -file $file -backupDir $backupDir
     }
 
-    # remove the backup directory
-    Write-Host "🗑️ Removing backup directory..."
+    Write-Host "`u{1F5D1}`u{FE0F} Removing backup directory..."
     Remove-Item -Force -Path $backupDir
-    # done
     Set-Location ~
-    Write-Host "🎉 Done!"
-}
-
-funtion try_clone_repo {
-    # check if git is installed
-    if (!(which git)) {
-        $decision = yes_or_no -title "Git not installed" -question "Do you want to install git via scoop?"
-        if ($decision -eq $true) {
-            scoop install git
-        }
-        Write-Host "🐈 Hey, I can't do that for you. Exiting..."
-        Set-Location ~
-        return false
-    }
-
-    # at this point, I will asume that you want to clone the repository
-    # check if the repository exists
-    Write-Host "🐱 Cloning repository..."
-    git clone "https://github.com/$user/$repository.git" -b $branch $repository
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "📛 Failed to clone repository: $($repository)" -ForegroundColor Red
-        return false
-    }
-
-    return true
+    Write-Host "`u{1F389} Done!"
 }
 
 function try_install_scoop {
-    # check if git is installed
     if (!(which scoop)) {
         $decision = yes_or_no -title "Scoop not installed" -question "Do you want to install scoop?"
-        if ($decision -eq $true) {
-            Invoke-Expression "& {$(Invoke-RestMethod get.scoop.sh)} -RunAsAdmin"
+        if ($decision) {
+            Invoke-RestMethod 'get.scoop.sh' | Invoke-Expression
         }
-        Write-Host "🐈 Hey, I can't do that for you. Exiting..."
+        Write-Host "`u{1F408} Hey, I can't do that for you. Exiting..."
         Set-Location ~
-        return 
+        return false
     }
-    Write-Host "🐱 Scoop is installed!"
-    # So we can use remote scoop.json (contains apps and buckets)
-    # Or we can use local scoop.json (contains apps and buckets)
+    Write-Host "`u{1F431} Scoop is installed!"
     $continue = yes_or_no -title "Apps and buckets" -question "Do you want to use remote scoop.json?"
     if (!($continue)) {
-        Write-Host "🐈 Ok, I'll pass."
-        return
+        Write-Host "`u{1F408} Ok, I'll pass."
+        return true
     }
     $outputFile = Join-Path -Path $pwd -ChildPath "scoop.json"
-    # use remote scoop.json, overwrite local scoop.json
-    Write-Host "📦 Fetching scoop.json from repository"
+    Write-Host "`u{1F4E6} Fetching scoop.json from repository"
     Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$user/$repository/$branch/assets/scoop.json" -OutFile $outputFile
-    # before to import, we need to add all buckets
-    # otherwise, scoop will fail to import
     $buckets = Get-Content -Path $outputFile | ConvertFrom-Json | Select-Object -ExpandProperty buckets | Select-Object -ExpandProperty Name
     foreach ($bucket in $buckets) {
         scoop bucket add $bucket
     }
     scoop import $outputFile
-    Write-Host "📦 Scoop packages installed!"
+    Write-Host "`u{1F4E6} Scoop packages installed!"
+    return true
 }
 
 function main {
-    Set-Location ~  # Go to the user's home directory
+    Set-Location ~
+    if (!(Test-Path -Path $tempDir)) {
+        New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
+        Write-Host "`u{1F4C1} Created temporary directory: $tempDir"
+    }
+    if (!(Test-Path -Path $backupDir)) {
+        New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
+        Write-Host "`u{1F4C1} Created backup directory: $backupDir"
+    }
 
-    # Create temporary directory for scoop.json
-    $tempDir = Join-Path -Path $pwd -ChildPath ".temp-dotfiles"
-    mkdir -Force $tempDir | Out-Null
-    Set-Location $tempDir
-
-    # Check if Scoop is installed
-    try_install_scoop
+    $scoopInstalled = try_install_scoop
+    if (!$scoopInstalled) {
+        Set-Location ~
+        Write-Host "`u{1F408} I cannot proceed without Scoop. Exiting..."
+        return
+    }
     
-    # check if local dotfiles exist
     if (Test-Path -Path $repository) {
         $overwrite = yes_or_no -title "Local dotfiles exist" -question "Do you want to overwrite the existing dotfiles?"
         if (!($overwrite)) {
             handle_local_dotfiles
         }
         Set-Location ~
-        Write-Host "🐈 Ok, nothing to do."
+        Write-Host "`u{1F408} Ok, nothing to do."
         return
     }
 
@@ -243,7 +231,10 @@ try {
     main
 }
 catch {
-    Write-Host "📛 Failed to install dotfiles: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Output "`u{1F4DB} Failed to install dotfiles: $($_.Exception.Message)"
+} finally {
+    Write-Host "`u{1F9F9} Cleaning up..."
+    Remove-Item -Force -Path $tempDir
+    Remove-Item -Force -Path $backupDir
     Set-Location ~
-    exit 1
 }
