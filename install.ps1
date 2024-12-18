@@ -65,10 +65,11 @@ function create_symlink (
     if ((Get-Item -Path $source).LinkType -eq 'SymbolicLink') {
         if ((Get-Item -Path $source).Target -eq $target) {
             return
-        }  
-        Remove-Item -Force -Path $source
-        Write-Host "`u{1F5D1}`u{FE0F} Symlink removed: $source -> $target"
+        }
     }
+
+    Remove-Item -Force -Path $source
+    Write-Host "`u{1F5D1}`u{FE0F} Symlink removed: $source -> $target"
 
     try {
         New-Item -ItemType SymbolicLink -Path $source -Target $target -Force -Confirm:$false | Out-Null
