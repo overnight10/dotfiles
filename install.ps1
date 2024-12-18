@@ -6,6 +6,15 @@ $branch = "windows"
 $backupDir = "~\.backup"
 $tempDir = Join-Path -Path $pwd -ChildPath ".temp-dotfiles"
 
+$receipts = @(
+    '~/.config'
+    '~\AppData'
+    '~\AppData\Roaming'
+    '~\AppData\Roaming\nushell'
+    '~\AppData\Roaming\helix'
+    '~\scoop'
+)
+
 $links = @(
     @{ Source = "~\.config"; Target = "$repository\.config" },
     @{ Source = "~\AppData\Roaming\nushell"; Target = "~\.config\nushell" },
@@ -49,6 +58,7 @@ function create_symlink (
     if (!(Test-Path -Path $source) -or !(Test-Path -Path $target)) {
         return
     }
+    
     if ((Get-Item -Path $source).LinkType -eq 'SymbolicLink') {
         if ((Get-Item -Path $source).Target -eq $target) {
             return
@@ -193,15 +203,22 @@ function try_install_scoop {
     return $true
 }
 
+function create_receipt {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string] $receip
+    )
+    if ((Test-Path -Path $receip)) {
+        return
+    }
+    New-Item -ItemType Directory -Path $receip -Force | Out-Null
+    Write-Host "`u{1F4C1} Created directory: $receip"
+}
+
 function main {
     Set-Location ~
-    if (!(Test-Path -Path $tempDir)) {
-        New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
-        Write-Host "`u{1F4C1} Created temporary directory: $tempDir"
-    }
-    if (!(Test-Path -Path $backupDir)) {
-        New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
-        Write-Host "`u{1F4C1} Created backup directory: $backupDir"
+    foreach ($receipt in $receipts) {
+        create_receipt $receipt
     }
 
     $scoopInstalled = try_install_scoop
