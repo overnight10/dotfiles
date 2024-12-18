@@ -7,6 +7,8 @@ $backupDir = "~\.backup"
 $tempDir = Join-Path -Path $pwd -ChildPath ".temp-dotfiles"
 
 $receipts = @(
+    $backupDir
+    $tempDir
     '~/.config'
     '~\AppData'
     '~\AppData\Roaming'
